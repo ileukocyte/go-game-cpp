@@ -1,9 +1,11 @@
 #include <algorithm>
 #include <iostream>
+#include <optional>
+#include <sstream>
 #include <string>
 #include <vector>
 
-enum class Sign : char {
+enum class Turn : char {
     CROSS = 'x',
     NOUGHT = 'o',
 };
@@ -57,14 +59,48 @@ public:
         }
     }
 
-    void set_cell(size_t x, size_t y, Sign player) {
+    void set_cell(size_t x, size_t y, Turn current_turn) {
         // TODO: game rules
-        board.at(x).at(y) = static_cast<char>(player);
+        board.at(x).at(y) = static_cast<char>(current_turn);
     }
 private:
     const size_t size;
     std::vector<std::vector<char>> board;
+
+    bool can_move(size_t x, size_t y, Turn current_turn) const noexcept {
+        // TODO
+        return true;
+    }
 };
+
+std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
+    size_t x{}, y{};
+    std::string input;
+
+    while (true) {
+        std::cout << "Current turn: " << static_cast<char>(current_turn) << '\n';
+        std::cout << "Enter two numbers (row column): ";
+
+        std::getline(std::cin, input);
+        std::istringstream iss(input);
+
+        iss >> x >> y;
+
+        if (iss.fail()) {
+            std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+            
+            if (input == "pass") {
+                return std::nullopt;
+            }
+
+            std::cout << "Invalid input! Try again!\n";
+
+            continue;
+        }
+
+        return std::make_pair(x, y);
+    }
+}
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -106,16 +142,28 @@ int main(int argc, char* argv[]) {
     try {
         Board board(board_size);
 
-        //board.set_cell(1, 1, Sign::CROSS);
-        //board.set_cell(1, 2, Sign::NOUGHT);
         board.print_board();
 
         auto is_over = false;
         auto is_x = true;
 
-        //while (!is_over) {
+        while (!is_over) {
+            try {
+                auto current_turn = is_x ? Turn::CROSS : Turn::NOUGHT;
+                
+                if (const auto& coords = read_input(current_turn)) {
+                    board.set_cell(coords.value().first, coords.value().second, current_turn);
+                }
 
-        //}
+                is_x = !is_x;
+
+                board.print_board();
+            } catch (const std::out_of_range& err) {
+                std::cout << "Invalid turn! Try again!\n";
+
+                continue;
+            }
+        }
     } catch (const std::out_of_range& err) {
         std::cerr << "Out of range: " << err.what() << '\n';
 
