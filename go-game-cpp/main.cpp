@@ -12,7 +12,7 @@ class Board {
 public:
     Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')) {
         if (size == 0) {
-            throw std::out_of_range("");
+            throw std::out_of_range("The size of the board cannot equal to 0!");
         }
     }
 
@@ -68,22 +68,28 @@ private:
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
+        std::cerr << "Invalid argument count!\n";
+
         return 1;
     }
 
-    unsigned board_size{};
+    size_t board_size{};
 
     try {
-        auto board_size_ul = std::stoul(argv[1]);
+        auto board_size_ul = std::stoull(argv[1]);
 
-        if (board_size_ul > std::numeric_limits<unsigned>::max()) {
-            throw std::out_of_range("");
+        if (board_size_ul > std::numeric_limits<size_t>::max()) {
+            throw std::out_of_range("The value is too large for size_t");
         }
 
-        board_size = static_cast<unsigned>(board_size_ul);
+        board_size = static_cast<size_t>(board_size_ul);
     } catch (const std::invalid_argument& err) {
+        std::cerr << "Invalid argument: " << err.what() << '\n';
+
         return 1;
     } catch (const std::out_of_range& err) {
+        std::cerr << "Out of range: " << err.what() << '\n';
+
         return 1;
     }
 
@@ -92,20 +98,29 @@ int main(int argc, char* argv[]) {
     std::transform(board_option.begin(), board_option.end(), board_option.begin(), ::tolower);
 
     if (board_option != "--board" && board_option != "--score") {
+        std::cerr << "The second argument must be either \"--board\" or \"--score\"!\n";
+
         return 1;
     }
 
-    Board board(19);
+    try {
+        Board board(board_size);
 
-    board.set_cell(1, 1, Sign::CROSS);
-    board.set_cell(1, 2, Sign::NOUGHT);
-    board.print_board();
+        //board.set_cell(1, 1, Sign::CROSS);
+        //board.set_cell(1, 2, Sign::NOUGHT);
+        board.print_board();
 
-    auto is_over = false;
+        auto is_over = false;
+        auto is_x = true;
 
-    //while (!is_over) {
+        //while (!is_over) {
 
-    //}
+        //}
+    } catch (const std::out_of_range& err) {
+        std::cerr << "Out of range: " << err.what() << '\n';
+
+        return 1;
+    }
 
     return 0;
 }
