@@ -12,7 +12,7 @@ enum class Turn : char {
 
 class Board {
 public:
-    Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')) {
+    Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')), x_score(0), o_score(0) {
         if (size == 0) {
             throw std::out_of_range("The size of the board cannot equal to 0!");
         }
@@ -59,17 +59,107 @@ public:
         }
     }
 
-    void set_cell(size_t x, size_t y, Turn current_turn) {
-        // TODO: game rules
-        board.at(x).at(y) = static_cast<char>(current_turn);
+    void occupy_cell(size_t x, size_t y, Turn current_turn) {
+        auto cell = &board.at(x).at(y);
+
+        if (*cell != '.') {
+            throw std::invalid_argument("The cell is already occupied!");
+        }
+            
+        *cell = static_cast<char>(current_turn);
+
+        auto opp_char = static_cast<char>(get_opp_turn(current_turn));
+
+        std::vector<std::pair<size_t, size_t>> cells_to_check;
+
+        if (x > 0) {
+            cells_to_check.push_back(std::make_pair(x - 1, y));
+        }
+
+        if (y > 0) {
+            cells_to_check.push_back(std::make_pair(x, y - 1));
+        }
+
+        if (x < size) {
+            cells_to_check.push_back(std::make_pair(x + 1, y));
+        }
+
+        if (y < size) {
+            cells_to_check.push_back(std::make_pair(x, y + 1));
+        }
+
+        for (const auto& pair : cells_to_check) {
+            auto a = pair.first, b = pair.second;
+            auto checked = &board[a][b];
+
+            if (*checked == opp_char) {
+                if (move_options(a, b).empty()) {
+                    *checked = '.';
+
+                    if (current_turn == Turn::CROSS) {
+                        x_score++;
+                    } else {
+                        o_score++;
+                    }
+                }
+            }
+        }
     }
 private:
     const size_t size;
+    unsigned x_score, o_score;
     std::vector<std::vector<char>> board;
 
-    bool can_move(size_t x, size_t y, Turn current_turn) const noexcept {
-        // TODO
-        return true;
+    std::vector<std::pair<size_t, size_t>> move_options(size_t x, size_t y) const {
+        auto cell = board[x][y];
+
+        std::vector<std::pair<size_t, size_t>> possible_moves;
+
+        for (auto i = x; i > 0; --i) {
+            if (board[i][y] != cell) {
+                if (board[i][y] == '.') {
+                    possible_moves.push_back(std::make_pair(i, y));
+                }
+
+                break;
+            }
+        }
+
+        for (auto i = y; i > 0; --i) {
+            if (board[x][i] != cell) {
+                if (board[x][i] == '.') {
+                    possible_moves.push_back(std::make_pair(x, i));
+                }
+
+                break;
+            }
+        }
+
+        for (auto i = x; i < size; ++i) {
+            if (board[i][y] != cell) {
+                if (board[i][y] == '.') {
+                    possible_moves.push_back(std::make_pair(i, y));
+                }
+
+                break;
+            }
+        }
+
+        for (auto i = y; i < size; ++i) {
+            if (board[x][i] != cell) {
+                if (board[x][i] == '.') {
+                    possible_moves.push_back(std::make_pair(x, i));
+                }
+
+                break;
+            }
+        }
+
+        return possible_moves;
+    }
+
+    Turn get_opp_turn(Turn current_turn) const noexcept {
+        return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;
     }
 };
 
@@ -146,13 +236,23 @@ int main(int argc, char* argv[]) {
 
         auto is_over = false;
         auto is_x = true;
+        auto has_passed = false;
 
         while (!is_over) {
             try {
                 auto current_turn = is_x ? Turn::CROSS : Turn::NOUGHT;
                 
                 if (const auto& coords = read_input(current_turn)) {
-                    board.set_cell(coords.value().first, coords.value().second, current_turn);
+                    board.occupy_cell(coords.value().first, coords.value().second, current_turn);
+
+                    has_passed = false;
+                } else {
+                    if (has_passed) {
+                        return 0;
+                        // TODO: exit
+                    }
+
+                    has_passed = true;
                 }
 
                 is_x = !is_x;
@@ -160,6 +260,10 @@ int main(int argc, char* argv[]) {
                 board.print_board();
             } catch (const std::out_of_range& err) {
                 std::cout << "Invalid turn! Try again!\n";
+
+                continue;
+            } catch (const std::invalid_argument& err) {
+                std::cout << err.what() << '\n';
 
                 continue;
             }
