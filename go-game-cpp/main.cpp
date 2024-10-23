@@ -5,163 +5,7 @@
 #include <string>
 #include <vector>
 
-enum class Turn : char {
-    CROSS = 'x',
-    NOUGHT = 'o',
-};
-
-class Board {
-public:
-    Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')), x_score(0), o_score(0) {
-        if (size == 0) {
-            throw std::out_of_range("The size of the board cannot equal to 0!");
-        }
-    }
-
-    const std::vector<std::vector<char>>& get_board_vec() const noexcept {
-        return board;
-    }
-
-    void print_board(bool enable_indices = true) const noexcept {
-        auto digit_count = [](size_t i) {
-            return i == 0 ? 1 : static_cast<size_t>(floor(log10(i))) + 1;
-        };
-
-        if (enable_indices) {
-            std::cout << std::string(digit_count(size) + 1, ' ');
-
-            for (auto i = 0; i < size; i++) {
-                std::cout << std::string(digit_count(size) - digit_count(i), ' ') << i << ' ';
-            }
-
-            std::cout << '\n';
-        }
-
-        auto y = 0;
-
-        for (const auto& row : board) {
-            auto x = 0;
-
-            for (const auto& cell : row) {
-                if (x == 0 && enable_indices) {
-                    std::cout << std::string(digit_count(size) - digit_count(y), ' ') << y;
-                }
-
-                std::cout << (!enable_indices ? std::string(x != 0, ' ') : std::string(digit_count(size), ' '));
-                std::cout << cell;
-
-                x++;
-            }
-
-            std::cout << '\n';
-
-            y++;
-        }
-    }
-
-    void occupy_cell(size_t x, size_t y, Turn current_turn) {
-        auto cell = &board.at(x).at(y);
-
-        if (*cell != '.') {
-            throw std::invalid_argument("The cell is already occupied!");
-        }
-            
-        *cell = static_cast<char>(current_turn);
-
-        auto opp_char = static_cast<char>(get_opp_turn(current_turn));
-
-        std::vector<std::pair<size_t, size_t>> cells_to_check;
-
-        if (x > 0) {
-            cells_to_check.push_back(std::make_pair(x - 1, y));
-        }
-
-        if (y > 0) {
-            cells_to_check.push_back(std::make_pair(x, y - 1));
-        }
-
-        if (x < size) {
-            cells_to_check.push_back(std::make_pair(x + 1, y));
-        }
-
-        if (y < size) {
-            cells_to_check.push_back(std::make_pair(x, y + 1));
-        }
-
-        for (const auto& pair : cells_to_check) {
-            auto a = pair.first, b = pair.second;
-            auto checked = &board[a][b];
-
-            if (*checked == opp_char) {
-                if (move_options(a, b).empty()) {
-                    *checked = '.';
-
-                    if (current_turn == Turn::CROSS) {
-                        x_score++;
-                    } else {
-                        o_score++;
-                    }
-                }
-            }
-        }
-    }
-private:
-    const size_t size;
-    unsigned x_score, o_score;
-    std::vector<std::vector<char>> board;
-
-    std::vector<std::pair<size_t, size_t>> move_options(size_t x, size_t y) const {
-        auto cell = board[x][y];
-
-        std::vector<std::pair<size_t, size_t>> possible_moves;
-
-        for (auto i = x; i > 0; --i) {
-            if (board[i][y] != cell) {
-                if (board[i][y] == '.') {
-                    possible_moves.push_back(std::make_pair(i, y));
-                }
-
-                break;
-            }
-        }
-
-        for (auto i = y; i > 0; --i) {
-            if (board[x][i] != cell) {
-                if (board[x][i] == '.') {
-                    possible_moves.push_back(std::make_pair(x, i));
-                }
-
-                break;
-            }
-        }
-
-        for (auto i = x; i < size; ++i) {
-            if (board[i][y] != cell) {
-                if (board[i][y] == '.') {
-                    possible_moves.push_back(std::make_pair(i, y));
-                }
-
-                break;
-            }
-        }
-
-        for (auto i = y; i < size; ++i) {
-            if (board[x][i] != cell) {
-                if (board[x][i] == '.') {
-                    possible_moves.push_back(std::make_pair(x, i));
-                }
-
-                break;
-            }
-        }
-
-        return possible_moves;
-    }
-
-    Turn get_opp_turn(Turn current_turn) const noexcept {
-        return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;
-    }
-};
+#include "Board.h"
 
 std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     size_t x{}, y{};
@@ -192,6 +36,8 @@ std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     }
 }
 
+// TODO: the ko rule
+// TODO: finish --score
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Invalid argument count!\n";
@@ -248,8 +94,13 @@ int main(int argc, char* argv[]) {
                     has_passed = false;
                 } else {
                     if (has_passed) {
+                        if (board_option == "--score") {
+                            std::cout << board.get_x_score() << ' ' << board.get_o_score() << '\n';
+                        } else {
+                            board.print_board();
+                        }
+                        
                         return 0;
-                        // TODO: exit
                     }
 
                     has_passed = true;
