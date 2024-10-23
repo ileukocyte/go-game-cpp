@@ -2,7 +2,12 @@
 
 #include "Board.h"
 
-Board::Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')), x_score(0), o_score(0) {
+Board::Board(size_t size) :
+    size(size),
+    board(size, std::vector<char>(size, '.')),
+    x_score(0),
+    o_score(0)
+{
     if (size == 0) {
         throw std::out_of_range("The size of the board cannot equal to 0!");
     }
@@ -11,7 +16,7 @@ Board::Board(size_t size) : size(size), board(size, std::vector<char>(size, '.')
 void Board::print_board(bool enable_indices) const noexcept {
     auto digit_count = [](size_t i) {
         return i == 0 ? 1 : static_cast<size_t>(floor(log10(i))) + 1;
-        };
+    };
 
     if (enable_indices) {
         std::cout << std::string(digit_count(size) + 1, ' ');
@@ -84,7 +89,16 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
         throw std::invalid_argument("This move would result in an unprofitable suicide!");
     }
 
+    auto state_str = as_state_str();
+
+    if (std::find(state_vec.begin(), state_vec.end(), state_str) != state_vec.end()) {
+        *cell = '.';
+
+        throw std::invalid_argument("This move is forbidden by the ko rule!");
+    }
+
     board = board_copy;
+    state_vec.push_back(state_str);
 }
 
 bool Board::liberty_check(
@@ -139,4 +153,16 @@ bool Board::has_liberties(size_t x, size_t y, const std::vector<std::vector<char
 
 Turn Board::get_opp_turn(Turn current_turn) const noexcept {
     return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;
+}
+
+std::string Board::as_state_str() const noexcept {
+    std::string state;
+
+    for (const auto& row : board) {
+        for (auto cell : row) {
+            state += cell;
+        }
+    }
+
+    return state;
 }

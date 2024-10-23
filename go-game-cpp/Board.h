@@ -4,8 +4,8 @@
 #include <vector>
 
 enum class Turn : char {
-    CROSS = 'x',
-    NOUGHT = 'o',
+    CROSS = 'X',
+    NOUGHT = 'O',
 };
 
 class Board {
@@ -27,10 +27,13 @@ public:
     void print_board(bool enable_indices = true) const noexcept;
 
     void occupy_cell(std::size_t x, std::size_t y, Turn current_turn);
+
+    std::string as_state_str() const noexcept;
 private:
     const std::size_t size{};
     unsigned x_score{}, o_score{};
     std::vector<std::vector<char>> board{};
+    std::vector<std::string> state_vec{};
 
     bool liberty_check(
         std::size_t x,

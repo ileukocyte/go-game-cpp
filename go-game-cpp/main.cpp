@@ -36,7 +36,6 @@ std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     }
 }
 
-// TODO: the ko rule
 // TODO: finish --score
 int main(int argc, char* argv[]) {
     if (argc != 3) {
@@ -71,6 +70,12 @@ int main(int argc, char* argv[]) {
 
     if (board_option != "--board" && board_option != "--score") {
         std::cerr << "The second argument must be either \"--board\" or \"--score\"!\n";
+
+        return 1;
+    }
+
+    if (board_option == "--score") {
+        std::cerr << "Unimplemented\n";
 
         return 1;
     }
