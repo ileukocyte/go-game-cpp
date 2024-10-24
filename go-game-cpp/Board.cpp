@@ -22,7 +22,7 @@ void Board::print_board(bool enable_indices) const noexcept {
     if (enable_indices) {
         std::cout << std::string(digit_count(size) + 1, ' ');
 
-        for (auto i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             std::cout << std::string(digit_count(size) - digit_count(i), ' ') << i << ' ';
         }
 
@@ -60,16 +60,16 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
 
     *cell = static_cast<char>(current_turn);
 
-    auto probable_suicide = !has_liberties(x, y, board);
+    auto probable_suicide = !has_liberties(x, y);
 
     auto opp_char = static_cast<char>(get_opp_turn(current_turn));
 
     std::vector<std::vector<char>> copy(board);
 
-    for (auto i = 0; i < size; i++) {
-        for (auto j = 0; j < size; j++) {
+    for (size_t i = 0; i < size; i++) {
+        for (size_t j = 0; j < size; j++) {
             if (board[i][j] == opp_char) {
-                if (!has_liberties(i, j, board)) {
+                if (!has_liberties(i, j)) {
                     probable_suicide = false;
 
                     copy[i][j] = '.';
@@ -106,8 +106,7 @@ bool Board::liberty_check(
     size_t x,
     size_t y,
     char sign,
-    std::vector<std::vector<bool>>& visited,
-    const std::vector<std::vector<char>>& board
+    std::vector<std::vector<bool>>& visited
 ) noexcept {
     if (x >= size || y >= size || visited[x][y]) {
         return false;
@@ -126,30 +125,30 @@ bool Board::liberty_check(
     auto has_liberty = false;
 
     if (x > 0) {
-        has_liberty = has_liberty || liberty_check(x - 1, y, sign, visited, board);
+        has_liberty = has_liberty || liberty_check(x - 1, y, sign, visited);
     }
 
     if (y > 0) {
-        has_liberty = has_liberty || liberty_check(x, y - 1, sign, visited, board);
+        has_liberty = has_liberty || liberty_check(x, y - 1, sign, visited);
     }
 
     if (x < size - 1) {
-        has_liberty = has_liberty || liberty_check(x + 1, y, sign, visited, board);
+        has_liberty = has_liberty || liberty_check(x + 1, y, sign, visited);
     }
 
     if (y < size - 1) {
-        has_liberty = has_liberty || liberty_check(x, y + 1, sign, visited, board);
+        has_liberty = has_liberty || liberty_check(x, y + 1, sign, visited);
     }
 
     return has_liberty;
 }
 
-bool Board::has_liberties(size_t x, size_t y, const std::vector<std::vector<char>>& board) noexcept {
+bool Board::has_liberties(size_t x, size_t y) noexcept {
     auto cell = board[x][y];
 
     std::vector<std::vector<bool>> visited(size, std::vector<bool>(size, false));
 
-    return liberty_check(x, y, cell, visited, board);
+    return liberty_check(x, y, cell, visited);
 }
 
 void Board::fill_blank_region(
@@ -186,7 +185,7 @@ void Board::fill_blank_region(
     }
 }
 
-std::pair<size_t, size_t> Board::count_territories() noexcept {
+std::pair<unsigned, unsigned> Board::count_territories() noexcept {
     auto territory_owner = [&](const std::vector<std::pair<size_t, size_t>>& region) -> std::optional<char> {
         auto owner_consistent = std::make_pair('\0', true);
 
@@ -235,12 +234,12 @@ std::pair<size_t, size_t> Board::count_territories() noexcept {
         return owner_consistent.second ? std::make_optional(owner_consistent.first) : std::nullopt;
     };
 
-    size_t x_territory = 0, o_territory = 0;
+    unsigned x_territory = 0, o_territory = 0;
 
     std::vector<std::vector<bool>> visited(size, std::vector<bool>(size, false));
 
-    for (auto i = 0; i < size; i++) {
-        for (auto j = 0; j < size; j++) {
+    for (size_t i = 0; i < size; i++) {
+        for (size_t j = 0; j < size; j++) {
             if (board[i][j] == '.' && !visited[i][j]) {
                 std::vector<std::pair<size_t, size_t>> region{};
 
@@ -249,11 +248,11 @@ std::pair<size_t, size_t> Board::count_territories() noexcept {
                 if (auto owner = territory_owner(region)) {
                     switch (static_cast<Turn>(owner.value())) {
                     case Turn::CROSS:
-                        x_territory += region.size();
+                        x_territory += static_cast<unsigned>(region.size());
 
                         break;
                     case Turn::NOUGHT:
-                        o_territory += region.size();
+                        o_territory += static_cast<unsigned>(region.size());
 
                         break;
                     }

@@ -29,7 +29,7 @@ public:
 
     void occupy_cell(std::size_t x, std::size_t y, Turn current_turn);
 
-    std::pair<size_t, size_t> count_territories() noexcept;
+    std::pair<unsigned, unsigned> count_territories() noexcept;
 
     std::string as_state_str() const noexcept;
 private:
@@ -42,11 +42,10 @@ private:
         std::size_t x,
         std::size_t y,
         char sign,
-        std::vector<std::vector<bool>>& visited,
-        const std::vector<std::vector<char>>& board
+        std::vector<std::vector<bool>>& visited
     ) noexcept;
 
-    bool has_liberties(std::size_t x, std::size_t y, const std::vector<std::vector<char>>& board) noexcept;
+    bool has_liberties(std::size_t x, std::size_t y) noexcept;
 
     void fill_blank_region(
         size_t x,
