@@ -9,7 +9,7 @@
 
 std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     size_t x{}, y{};
-    std::string input;
+    std::string input{};
 
     while (true) {
         std::cout << "Current turn: " << static_cast<char>(current_turn) << '\n';
@@ -36,8 +36,31 @@ std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     }
 }
 
-// TODO: finish --score
-int main(int argc, char* argv[]) {
+// TODO: test case, remove!!!!!!!!!!!!!!!
+int main() {
+    std::vector<std::vector<char>> board_vec = {
+        {'.', '.', 'X', '.', '.'},
+        {'X', 'X', '.', '.', '.'},
+        {'O', 'O', 'O', 'X', 'O'},
+        {'.', 'O', 'X', 'O', 'O'},
+        {'X', 'X', 'X', 'O', '.'}
+    };
+    auto size = board_vec.size();
+
+    Board board(std::move(board_vec));
+
+    board.print_board();
+
+    std::cout << '\n';
+
+    auto [x_territory, o_territory] = board.count_territories();
+
+    std::cout << x_territory << ' ' << o_territory << '\n';
+
+    return 0;
+}
+
+int main1(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Invalid argument count!\n";
 
@@ -74,12 +97,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (board_option == "--score") {
-        std::cerr << "Unimplemented\n";
-
-        return 1;
-    }
-
     try {
         Board board(board_size);
 
@@ -100,7 +117,13 @@ int main(int argc, char* argv[]) {
                 } else {
                     if (has_passed) {
                         if (board_option == "--score") {
-                            std::cout << board.get_x_score() << ' ' << board.get_o_score() << '\n';
+                            auto x_score = board.get_x_score(), o_score = board.get_o_score();
+                            auto [x_territory, o_territory] = board.count_territories();
+
+                            x_score += x_territory;
+                            o_score += o_territory;
+
+                            std::cout << x_score << ' ' << o_score << '\n';
                         } else {
                             board.print_board();
                         }
@@ -114,7 +137,7 @@ int main(int argc, char* argv[]) {
                 is_x = !is_x;
 
                 board.print_board();
-            } catch (const std::out_of_range& err) {
+            } catch (const std::out_of_range&) {
                 std::cout << "Invalid turn! Try again!\n";
 
                 continue;
