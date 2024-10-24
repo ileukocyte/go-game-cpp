@@ -14,14 +14,6 @@ Board::Board(size_t size) :
     }
 }
 
-// TODO: remove
-Board::Board(std::vector<std::vector<char>> board) :
-    board(board),
-    size(board.size()),
-    x_score(0),
-    o_score(0) {
-}
-
 void Board::print_board(bool enable_indices) const noexcept {
     auto digit_count = [](size_t i) {
         return i == 0 ? 1 : static_cast<size_t>(floor(log10(i))) + 1;

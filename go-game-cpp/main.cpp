@@ -36,31 +36,7 @@ std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
     }
 }
 
-// TODO: test case, remove!!!!!!!!!!!!!!!
-int main() {
-    std::vector<std::vector<char>> board_vec = {
-        {'.', '.', 'X', '.', '.'},
-        {'X', 'X', '.', '.', '.'},
-        {'O', 'O', 'O', 'X', 'O'},
-        {'.', 'O', 'X', 'O', 'O'},
-        {'X', 'X', 'X', 'O', '.'}
-    };
-    auto size = board_vec.size();
-
-    Board board(std::move(board_vec));
-
-    board.print_board();
-
-    std::cout << '\n';
-
-    auto [x_territory, o_territory] = board.count_territories();
-
-    std::cout << x_territory << ' ' << o_territory << '\n';
-
-    return 0;
-}
-
-int main1(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Invalid argument count!\n";
 

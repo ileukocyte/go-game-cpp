@@ -13,9 +13,6 @@ class Board {
 public:
     Board(std::size_t size);
 
-    // TODO: remove
-    Board(std::vector<std::vector<char>> board);
-
     const std::vector<std::vector<char>>& get_board_vec() const noexcept {
         return board;
     }
