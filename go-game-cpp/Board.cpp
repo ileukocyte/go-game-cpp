@@ -4,10 +4,10 @@
 #include "Board.h"
 
 Board::Board(size_t size) :
-    size(size),
-    board(size, std::vector<char>(size, '.')),
-    x_score(0),
-    o_score(0)
+    size_(size),
+    board_(size, std::vector<char>(size, '.')),
+    x_score_(0),
+    o_score_(0)
 {
     if (size == 0) {
         throw std::out_of_range("The size of the board cannot equal to 0!");
@@ -20,10 +20,10 @@ void Board::print_board(bool enable_indices) const noexcept {
     };
 
     if (enable_indices) {
-        std::cout << std::string(digit_count(size) + 1, ' ');
+        std::cout << std::string(digit_count(size_) + 1, ' ');
 
-        for (size_t i = 0; i < size; i++) {
-            std::cout << std::string(digit_count(size) - digit_count(i), ' ') << i << ' ';
+        for (size_t i = 0; i < size_; i++) {
+            std::cout << std::string(digit_count(size_) - digit_count(i), ' ') << i << ' ';
         }
 
         std::cout << '\n';
@@ -31,15 +31,15 @@ void Board::print_board(bool enable_indices) const noexcept {
 
     auto y = 0;
 
-    for (const auto& row : board) {
+    for (const auto& row : board_) {
         auto x = 0;
 
         for (const auto& cell : row) {
             if (x == 0 && enable_indices) {
-                std::cout << std::string(digit_count(size) - digit_count(y), ' ') << y;
+                std::cout << std::string(digit_count(size_) - digit_count(y), ' ') << y;
             }
 
-            std::cout << (!enable_indices ? std::string(x != 0, ' ') : std::string(digit_count(size), ' '));
+            std::cout << (!enable_indices ? std::string(x != 0, ' ') : std::string(digit_count(size_), ' '));
             std::cout << cell;
 
             x++;
@@ -52,7 +52,7 @@ void Board::print_board(bool enable_indices) const noexcept {
 }
 
 void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
-    auto cell = &board.at(x).at(y);
+    auto cell = &board_.at(x).at(y);
 
     if (*cell != '.') {
         throw std::invalid_argument("The cell is already occupied!");
@@ -64,20 +64,20 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
 
     auto opp_char = static_cast<char>(get_opp_turn(current_turn));
 
-    std::vector<std::vector<char>> copy(board);
+    std::vector<std::vector<char>> copy(board_);
 
-    for (size_t i = 0; i < size; i++) {
-        for (size_t j = 0; j < size; j++) {
-            if (board[i][j] == opp_char) {
+    for (size_t i = 0; i < size_; i++) {
+        for (size_t j = 0; j < size_; j++) {
+            if (board_[i][j] == opp_char) {
                 if (!has_liberties(i, j)) {
                     probable_suicide = false;
 
                     copy[i][j] = '.';
 
                     if (current_turn == Turn::CROSS) {
-                        x_score++;
+                        x_score_++;
                     } else {
-                        o_score++;
+                        o_score_++;
                     }
                 }
             }
@@ -92,14 +92,14 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
 
     auto state_str = as_state_str();
 
-    if (std::ranges::find(state_vec, state_str) != state_vec.end()) {
+    if (std::ranges::find(state_vec_, state_str) != state_vec_.end()) {
         *cell = '.';
 
         throw std::invalid_argument("This move is forbidden by the ko rule!");
     }
 
-    board = copy;
-    state_vec.insert(state_str);
+    board_ = copy;
+    state_vec_.insert(state_str);
 }
 
 bool Board::liberty_check(
@@ -108,15 +108,15 @@ bool Board::liberty_check(
     char sign,
     std::vector<std::vector<bool>>& visited
 ) noexcept {
-    if (x >= size || y >= size || visited[x][y]) {
+    if (x >= size_ || y >= size_ || visited[x][y]) {
         return false;
     }
 
-    if (board[x][y] == '.') {
+    if (board_[x][y] == '.') {
         return true;
     }
 
-    if (board[x][y] != sign) {
+    if (board_[x][y] != sign) {
         return false;
     }
 
@@ -132,11 +132,11 @@ bool Board::liberty_check(
         has_liberty = has_liberty || liberty_check(x, y - 1, sign, visited);
     }
 
-    if (x < size - 1) {
+    if (x < size_ - 1) {
         has_liberty = has_liberty || liberty_check(x + 1, y, sign, visited);
     }
 
-    if (y < size - 1) {
+    if (y < size_ - 1) {
         has_liberty = has_liberty || liberty_check(x, y + 1, sign, visited);
     }
 
@@ -144,9 +144,9 @@ bool Board::liberty_check(
 }
 
 bool Board::has_liberties(size_t x, size_t y) noexcept {
-    auto cell = board[x][y];
+    auto cell = board_[x][y];
 
-    std::vector<std::vector<bool>> visited(size, std::vector<bool>(size, false));
+    std::vector<std::vector<bool>> visited(size_, std::vector<bool>(size_, false));
 
     return liberty_check(x, y, cell, visited);
 }
@@ -157,11 +157,11 @@ void Board::fill_blank_region(
     std::vector<std::vector<bool>>& visited,
     std::vector<std::pair<size_t, size_t>>& region
 ) noexcept {
-    if (x >= size || y >= size) {
+    if (x >= size_ || y >= size_) {
         return;
     }
 
-    if (visited[x][y] || board[x][y] != '.') {
+    if (visited[x][y] || board_[x][y] != '.') {
         return;
     }
 
@@ -176,11 +176,11 @@ void Board::fill_blank_region(
         fill_blank_region(x, y - 1, visited, region);
     }
 
-    if (x < size - 1) {
+    if (x < size_ - 1) {
         fill_blank_region(x + 1, y, visited, region);
     }
 
-    if (y < size - 1) {
+    if (y < size_ - 1) {
         fill_blank_region(x, y + 1, visited, region);
     }
 }
@@ -191,41 +191,41 @@ std::pair<unsigned, unsigned> Board::count_territories() noexcept {
 
         for (const auto& [x, y] : region) {
             if (x > 0 && owner_consistent.second) {
-                if (board[x - 1][y] != '.') {
+                if (board_[x - 1][y] != '.') {
                     if (owner_consistent.first == '\0') {
-                        owner_consistent.first = board[x - 1][y];
+                        owner_consistent.first = board_[x - 1][y];
                     } else {
-                        owner_consistent.second = owner_consistent.first == board[x - 1][y];
+                        owner_consistent.second = owner_consistent.first == board_[x - 1][y];
                     }
                 }
             }
 
             if (y > 0 && owner_consistent.second) {
-                if (board[x][y - 1] != '.') {
+                if (board_[x][y - 1] != '.') {
                     if (owner_consistent.first == '\0') {
-                        owner_consistent.first = board[x][y - 1];
+                        owner_consistent.first = board_[x][y - 1];
                     } else {
-                        owner_consistent.second = owner_consistent.first == board[x][y - 1];
+                        owner_consistent.second = owner_consistent.first == board_[x][y - 1];
                     }
                 }
             }
 
-            if (x < size - 1 && owner_consistent.second) {
-                if (board[x + 1][y] != '.') {
+            if (x < size_ - 1 && owner_consistent.second) {
+                if (board_[x + 1][y] != '.') {
                     if (owner_consistent.first == '\0') {
-                        owner_consistent.first = board[x + 1][y];
+                        owner_consistent.first = board_[x + 1][y];
                     } else {
-                        owner_consistent.second = owner_consistent.first == board[x + 1][y];
+                        owner_consistent.second = owner_consistent.first == board_[x + 1][y];
                     }
                 }
             }
 
-            if (y < size - 1 && owner_consistent.second) {
-                if (board[x][y + 1] != '.') {
+            if (y < size_ - 1 && owner_consistent.second) {
+                if (board_[x][y + 1] != '.') {
                     if (owner_consistent.first == '\0') {
-                        owner_consistent.first = board[x][y + 1];
+                        owner_consistent.first = board_[x][y + 1];
                     } else {
-                        owner_consistent.second = owner_consistent.first == board[x][y + 1];
+                        owner_consistent.second = owner_consistent.first == board_[x][y + 1];
                     }
                 }
             }
@@ -236,11 +236,11 @@ std::pair<unsigned, unsigned> Board::count_territories() noexcept {
 
     unsigned x_territory = 0, o_territory = 0;
 
-    std::vector<std::vector<bool>> visited(size, std::vector<bool>(size, false));
+    std::vector<std::vector<bool>> visited(size_, std::vector<bool>(size_, false));
 
-    for (size_t i = 0; i < size; i++) {
-        for (size_t j = 0; j < size; j++) {
-            if (board[i][j] == '.' && !visited[i][j]) {
+    for (size_t i = 0; i < size_; i++) {
+        for (size_t j = 0; j < size_; j++) {
+            if (board_[i][j] == '.' && !visited[i][j]) {
                 std::vector<std::pair<size_t, size_t>> region{};
 
                 fill_blank_region(i, j, visited, region);
@@ -271,7 +271,7 @@ Turn Board::get_opp_turn(Turn current_turn) const noexcept {
 std::string Board::as_state_str() const noexcept {
     std::string state;
 
-    for (const auto& row : board) {
+    for (const auto& row : board_) {
         for (auto cell : row) {
             state += cell;
         }

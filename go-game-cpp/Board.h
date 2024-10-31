@@ -14,15 +14,15 @@ public:
     Board(std::size_t size);
 
     const std::vector<std::vector<char>>& get_board_vec() const noexcept {
-        return board;
+        return board_;
     }
 
     unsigned get_x_score() const noexcept {
-        return x_score;
+        return x_score_;
     }
 
     unsigned get_o_score() const noexcept {
-        return o_score;
+        return o_score_;
     }
 
     void print_board(bool enable_indices = true) const noexcept;
@@ -33,10 +33,10 @@ public:
 
     std::string as_state_str() const noexcept;
 private:
-    const std::size_t size{};
-    unsigned x_score{}, o_score{};
-    std::vector<std::vector<char>> board{};
-    std::unordered_set<std::string> state_vec{};
+    const std::size_t size_{};
+    unsigned x_score_{}, o_score_{};
+    std::vector<std::vector<char>> board_{};
+    std::unordered_set<std::string> state_vec_{};
 
     bool liberty_check(
         std::size_t x,
