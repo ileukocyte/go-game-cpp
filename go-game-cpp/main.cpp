@@ -21,7 +21,7 @@ std::optional<std::pair<size_t, size_t>> read_input(Turn current_turn) {
         iss >> x >> y;
 
         if (iss.fail()) {
-            std::transform(input.begin(), input.end(), input.begin(), ::tolower);
+            std::ranges::transform(input, input.begin(), ::tolower);
             
             if (input == "pass") {
                 return std::nullopt;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
 
     auto board_option = std::string(argv[2]);
 
-    std::transform(board_option.begin(), board_option.end(), board_option.begin(), ::tolower);
+    std::ranges::transform(board_option, board_option.begin(), ::tolower);
 
     if (board_option != "--board" && board_option != "--score") {
         std::cerr << "The second argument must be either \"--board\" or \"--score\"!\n";

@@ -15,7 +15,7 @@ Board::Board(size_t size) :
 }
 
 void Board::print_board(bool enable_indices) const noexcept {
-    auto digit_count = [](size_t i) {
+    auto digit_count = [](const size_t i) {
         return i == 0 ? 1 : static_cast<size_t>(floor(log10(i))) + 1;
     };
 
@@ -92,7 +92,7 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
 
     auto state_str = as_state_str();
 
-    if (std::find(state_vec.begin(), state_vec.end(), state_str) != state_vec.end()) {
+    if (std::ranges::find(state_vec, state_str) != state_vec.end()) {
         *cell = '.';
 
         throw std::invalid_argument("This move is forbidden by the ko rule!");
