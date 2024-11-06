@@ -17,12 +17,12 @@ public:
         return board_;
     }
 
-    unsigned get_x_score() const noexcept {
-        return x_score_;
+    unsigned get_x_points() const noexcept {
+        return x_points_;
     }
 
-    unsigned get_o_score() const noexcept {
-        return o_score_;
+    unsigned get_o_points() const noexcept {
+        return o_points_;
     }
 
     void print_board(bool enable_indices = true) const noexcept;
@@ -34,22 +34,22 @@ public:
     std::string as_state_str() const noexcept;
 private:
     const std::size_t size_{};
-    unsigned x_score_{}, o_score_{};
+    unsigned x_points_{}, o_points_{};
     std::vector<std::vector<char>> board_{};
     std::unordered_set<std::string> state_vec_{};
 
     bool liberty_check(
-        std::size_t x,
-        std::size_t y,
+        std::size_t i,
+        std::size_t j,
         char sign,
         std::vector<std::vector<bool>>& visited
     ) noexcept;
 
-    bool has_liberties(std::size_t x, std::size_t y) noexcept;
+    bool has_liberties(std::size_t i, std::size_t j) noexcept;
 
     void fill_blank_region(
-        size_t x,
-        size_t y,
+        size_t i,
+        size_t j,
         std::vector<std::vector<bool>>& visited,
         std::vector<std::pair<size_t, size_t>>& region
     ) noexcept;

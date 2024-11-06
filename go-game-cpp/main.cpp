@@ -78,22 +78,21 @@ int main(int argc, char* argv[]) {
 
         board.print_board();
 
-        auto is_over = false;
         auto is_x = true;
-        auto has_passed = false;
+        auto passed_last = false;
 
-        while (!is_over) {
+        while (true) {
             try {
                 auto current_turn = is_x ? Turn::CROSS : Turn::NOUGHT;
                 
                 if (const auto& coords = read_input(current_turn)) {
                     board.occupy_cell(coords.value().first, coords.value().second, current_turn);
 
-                    has_passed = false;
+                    passed_last = false;
                 } else {
-                    if (has_passed) {
+                    if (passed_last) {
                         if (board_option == "--score") {
-                            auto x_score = board.get_x_score(), o_score = board.get_o_score();
+                            auto x_score = board.get_x_points(), o_score = board.get_o_points();
                             auto [x_territory, o_territory] = board.count_territories();
 
                             x_score += x_territory;
@@ -107,7 +106,7 @@ int main(int argc, char* argv[]) {
                         return 0;
                     }
 
-                    has_passed = true;
+                    passed_last = true;
                 }
 
                 is_x = !is_x;
