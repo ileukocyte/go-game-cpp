@@ -78,13 +78,11 @@ int main(int argc, char* argv[]) {
 
         board.print_board();
 
-        auto is_x = true;
+        auto current_turn = Turn::CROSS;
         auto passed_last = false;
 
         while (true) {
             try {
-                auto current_turn = is_x ? Turn::CROSS : Turn::NOUGHT;
-                
                 if (const auto& coords = read_input(current_turn)) {
                     board.occupy_cell(coords.value().first, coords.value().second, current_turn);
 
@@ -109,7 +107,7 @@ int main(int argc, char* argv[]) {
                     passed_last = true;
                 }
 
-                is_x = !is_x;
+                current_turn = Board::get_opp_turn(current_turn);
 
                 board.print_board();
             } catch (const std::out_of_range&) {

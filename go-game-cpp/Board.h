@@ -32,6 +32,10 @@ public:
     std::pair<unsigned, unsigned> count_territories() noexcept;
 
     std::string as_state_str() const noexcept;
+
+    static Turn get_opp_turn(Turn current_turn) noexcept {
+        return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;
+    }
 private:
     const std::size_t size_{};
     unsigned x_points_{}, o_points_{};
@@ -53,8 +57,6 @@ private:
         std::vector<std::vector<bool>>& visited,
         std::vector<std::pair<size_t, size_t>>& region
     ) noexcept;
-
-    Turn get_opp_turn(Turn current_turn) const noexcept;
 };
 
 #endif

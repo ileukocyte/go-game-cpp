@@ -241,10 +241,6 @@ std::pair<unsigned, unsigned> Board::count_territories() noexcept {
     return std::make_pair(x_territory, o_territory);
 }
 
-Turn Board::get_opp_turn(Turn current_turn) const noexcept {
-    return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;
-}
-
 std::string Board::as_state_str() const noexcept {
     std::string state;
 
