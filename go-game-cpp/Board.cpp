@@ -1,6 +1,7 @@
 #include <iomanip>
 #include <iostream>
 #include <optional>
+#include <random>
 
 #include "Board.h"
 
@@ -8,10 +9,23 @@ Board::Board(size_t size) :
     size_(size),
     board_(size, std::vector<char>(size, '.')),
     x_points_(0),
-    o_points_(0)
+    o_points_(0),
+    zobrist_table_(size, std::vector<std::vector<uint64_t>>(size, std::vector<uint64_t>(3)))
 {
     if (size == 0) {
         throw std::out_of_range("The size of the board cannot equal to 0!");
+    }
+
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    std::uniform_int_distribution<uint64_t> dis;
+
+    for (auto i = 0; i < size; ++i) {
+        for (auto j = 0; j < size; ++j) {
+            for (auto k = 0; k < 3; ++k) {
+                zobrist_table_[i][j][k] = dis(gen);
+            }
+        }
     }
 }
 
@@ -82,16 +96,16 @@ void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
         throw std::invalid_argument("This move would result in an unprofitable suicide!");
     }
 
-    auto state_str = as_state_str();
+    auto hash = calculate_hash();
 
-    if (std::ranges::find(state_vec_, state_str) != state_vec_.end()) {
+    if (state_map_.find(hash) != state_map_.end()) {
         *cell = '.';
 
         throw std::invalid_argument("This move is forbidden by the ko rule!");
     }
 
+    state_map_[hash] = true;
     board_ = copy;
-    state_vec_.insert(state_str);
 }
 
 bool Board::liberty_check(
@@ -115,7 +129,7 @@ bool Board::liberty_check(
     visited[i][j] = true;
 
     auto has_liberty = (i > 0 && liberty_check(i - 1, j, sign, visited)) ||
-        (j > 0) || liberty_check(i, j - 1, sign, visited) ||
+        (j > 0 && liberty_check(i, j - 1, sign, visited)) ||
         (i < size_ - 1 && liberty_check(i + 1, j, sign, visited)) ||
         (j < size_ - 1 && liberty_check(i, j + 1, sign, visited));
 
@@ -232,14 +246,17 @@ std::pair<unsigned, unsigned> Board::count_territories() noexcept {
     return std::make_pair(x_territory, o_territory);
 }
 
-std::string Board::as_state_str() const noexcept {
-    std::string state;
+uint64_t Board::calculate_hash() const noexcept {
+    uint64_t hash{};
 
-    for (const auto& row : board_) {
-        for (auto cell : row) {
-            state += cell;
+    for (auto i = 0; i < size_; i++) {
+        for (auto j = 0; j < size_; j++) {
+            auto cell = board_[i][j];
+            auto piece = cell == '.' ? 0 : (cell == static_cast<char>(Turn::CROSS) ? 1 : 2);
+
+            hash ^= zobrist_table_[i][j][piece];
         }
     }
 
-    return state;
+    return hash;
 }

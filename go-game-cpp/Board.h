@@ -2,7 +2,7 @@
 #define BOARD_H
 
 #include <iostream>
-#include <unordered_set>
+#include <map>
 #include <vector>
 
 enum class Turn : char {
@@ -30,8 +30,6 @@ public:
 
     std::pair<unsigned, unsigned> count_territories() noexcept;
 
-    std::string as_state_str() const noexcept;
-
     friend std::ostream& operator<<(std::ostream& out, const Board& board) noexcept;
 
     static Turn get_opp_turn(Turn current_turn) noexcept {
@@ -41,7 +39,8 @@ private:
     const std::size_t size_{};
     unsigned x_points_{}, o_points_{};
     std::vector<std::vector<char>> board_{};
-    std::unordered_set<std::string> state_vec_{};
+    std::vector<std::vector<std::vector<uint64_t>>> zobrist_table_{};
+    std::map<uint64_t, bool> state_map_{};
 
     bool liberty_check(
         std::size_t i,
@@ -58,6 +57,8 @@ private:
         std::vector<std::vector<bool>>& visited,
         std::vector<std::pair<size_t, size_t>>& region
     ) noexcept;
+
+    uint64_t calculate_hash() const noexcept;
 };
 
 #endif
