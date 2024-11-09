@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     try {
         Board board(board_size);
 
-        board.print_board();
+        std::cout << board << '\n';
 
         auto current_turn = Turn::CROSS;
         auto passed_last = false;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
 
                             std::cout << x_score << ' ' << o_score << '\n';
                         } else {
-                            board.print_board();
+                            std::cout << board << '\n';
                         }
                         
                         return 0;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 
                 current_turn = Board::get_opp_turn(current_turn);
 
-                board.print_board();
+                std::cout << board << '\n';
             } catch (const std::out_of_range&) {
                 std::cout << "Invalid turn! Try again!\n";
 

@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <iostream>
 #include <unordered_set>
 #include <vector>
 
@@ -25,13 +26,13 @@ public:
         return o_points_;
     }
 
-    void print_board() const noexcept;
-
     void occupy_cell(std::size_t x, std::size_t y, Turn current_turn);
 
     std::pair<unsigned, unsigned> count_territories() noexcept;
 
     std::string as_state_str() const noexcept;
+
+    friend std::ostream& operator<<(std::ostream& out, const Board& board) noexcept;
 
     static Turn get_opp_turn(Turn current_turn) noexcept {
         return current_turn == Turn::CROSS ? Turn::NOUGHT : Turn::CROSS;

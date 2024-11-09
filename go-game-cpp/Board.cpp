@@ -15,32 +15,33 @@ Board::Board(size_t size) :
     }
 }
 
-void Board::print_board() const noexcept {
-    auto max_digit_count = static_cast<size_t>(floor(log10(size_))) + 1;
+std::ostream& operator<<(std::ostream& out, const Board& board) noexcept {
+    auto max_digit_count = static_cast<size_t>(floor(log10(board.size_))) + 1;
 
-    std::cout << std::string(max_digit_count + 1, ' ');
+    out << std::string(max_digit_count + 1, ' ');
 
-    for (size_t i = 0; i < size_; i++) {
-        std::cout << std::setfill(' ') << std::setw(max_digit_count) << i << ' ';
+    for (size_t i = 0; i < board.size_; i++) {
+        out << std::setfill(' ') << std::setw(max_digit_count) << i << ' ';
     }
 
-    std::cout << '\n';
+    out << '\n';
 
     auto i = 0;
 
-    for (const auto& row : board_) {
-        std::cout << std::setfill(' ') << std::setw(max_digit_count) << i;
-
-        for (const auto& cell : row) {
-            std::cout << std::setfill(' ') << std::setw(max_digit_count + 1) << cell;
+    for (const auto& row : board.board_) {
+        if (i > 0) {
+            out << '\n';
         }
 
-        std::cout << '\n';
+        out << std::setfill(' ') << std::setw(max_digit_count) << i++;
 
-        i++;
+        for (const auto& cell : row) {
+            out << std::setfill(' ') << std::setw(max_digit_count + 1) << cell;
+        }
     }
-}
 
+    return out;
+}
 
 void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
     auto cell = &board_.at(x).at(y);
