@@ -25,7 +25,7 @@ public:
         return o_points_;
     }
 
-    void print_board(bool enable_indices = true) const noexcept;
+    void print_board() const noexcept;
 
     void occupy_cell(std::size_t x, std::size_t y, Turn current_turn);
 

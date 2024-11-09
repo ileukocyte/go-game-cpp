@@ -15,35 +15,24 @@ Board::Board(size_t size) :
     }
 }
 
-void Board::print_board(bool enable_indices) const noexcept {
-    auto digit_count = [](const size_t i) {
-        return i == 0 ? 1 : static_cast<size_t>(floor(log10(i))) + 1;
-    };
+void Board::print_board() const noexcept {
+    auto max_digit_count = static_cast<size_t>(floor(log10(size_))) + 1;
 
-    if (enable_indices) {
-        std::cout << std::string(digit_count(size_) + 1, ' ');
+    std::cout << std::string(max_digit_count + 1, ' ');
 
-        for (size_t i = 0; i < size_; i++) {
-            std::cout << std::setfill(' ') << std::setw(digit_count(size_)) << i << ' ';
-        }
-
-        std::cout << '\n';
+    for (size_t i = 0; i < size_; i++) {
+        std::cout << std::setfill(' ') << std::setw(max_digit_count) << i << ' ';
     }
+
+    std::cout << '\n';
 
     auto i = 0;
 
     for (const auto& row : board_) {
-        auto j = 0;
+        std::cout << std::setfill(' ') << std::setw(max_digit_count) << i;
 
         for (const auto& cell : row) {
-            if (j == 0 && enable_indices) {
-                std::cout << std::setfill(' ') << std::setw(digit_count(size_)) << i;
-            }
-
-            std::cout << (!enable_indices ? std::string(j != 0, ' ') : std::string(digit_count(size_), ' '));
-            std::cout << cell;
-
-            j++;
+            std::cout << std::setfill(' ') << std::setw(max_digit_count + 1) << cell;
         }
 
         std::cout << '\n';
@@ -51,6 +40,7 @@ void Board::print_board(bool enable_indices) const noexcept {
         i++;
     }
 }
+
 
 void Board::occupy_cell(size_t x, size_t y, Turn current_turn) {
     auto cell = &board_.at(x).at(y);
